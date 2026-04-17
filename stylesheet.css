@@ -5,14 +5,36 @@
     padding: 0 2px;
 }
 
-.twitch-sort-menu-item {
-    padding: 4px 12px;
+.twitch-sort-toggle {
+    spacing: 0;
+    padding: 2px 8px;
 }
 
-.twitch-sort-check {
-    margin-left: auto;
-    icon-size: 16px;
+.twitch-sort-btn {
+    font-size: 10pt;
+    color: #888;
+    padding: 4px 0;
+    border-radius: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: transparent;
+    text-align: center;
+}
+
+.twitch-sort-btn:first-child {
+    border-radius: 6px 0 0 6px;
+}
+
+.twitch-sort-btn:last-child {
+    border-radius: 0 6px 6px 0;
+}
+
+.twitch-sort-btn:active {
     color: #bf94ff;
+}
+
+.twitch-sort-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #ccc;
 }
 
 .twitch-empty .popup-menu-item {
@@ -43,6 +65,16 @@
 
 .twitch-row-subtitle.offline {
     color: #555;
+}
+
+.twitch-row-stats {
+    font-size: 10pt;
+    color: #aaa;
+    margin-right: 6px;
+}
+
+.twitch-channel-scroll {
+    max-height: 420px;
 }
 
 .twitch-row-badge {
