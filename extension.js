@@ -8,6 +8,28 @@ import GObject from 'gi://GObject';
 import St from 'gi://St';
 import Soup from 'gi://Soup';
 import Clutter from 'gi://Clutter';
+import Secret from 'gi://Secret';
+
+const SECRET_SCHEMA = new Secret.Schema(
+    'org.gnome.shell.extensions.twitch-follower-status',
+    Secret.SchemaFlags.NONE,
+    {
+        credential: Secret.SchemaAttributeType.STRING,
+    },
+);
+
+function loadToken() {
+    try {
+        return Secret.password_lookup_sync(
+            SECRET_SCHEMA,
+            { credential: 'oauth-token' },
+            null,
+        ) ?? '';
+    } catch (e) {
+        log(`[TwitchFollower] keyring lookup failed: ${e.message}`);
+        return '';
+    }
+}
 
 const TWITCH_API = 'https://api.twitch.tv/helix';
 
@@ -244,9 +266,6 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
         addConn('client-id', () => {
             this._userId = null;
         });
-        addConn('oauth-token', () => {
-            this._userId = null;
-        });
     }
 
     _startRefresh() {
@@ -268,7 +287,7 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
         this._statusLabel.set_text('Refreshing\u2026');
 
         const clientId = this._settings.get_string('client-id');
-        const token = this._settings.get_string('oauth-token');
+        const token = loadToken();
 
         if (!clientId || !token) {
             this._statusLabel.set_text('Configure credentials in settings');

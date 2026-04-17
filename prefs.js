@@ -3,6 +3,48 @@ import Adw from 'gi://Adw';
 import Gtk from 'gi://Gtk';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
+import Secret from 'gi://Secret';
+
+const SECRET_SCHEMA = new Secret.Schema(
+    'org.gnome.shell.extensions.twitch-follower-status',
+    Secret.SchemaFlags.NONE,
+    {
+        credential: Secret.SchemaAttributeType.STRING,
+    },
+);
+
+function loadToken() {
+    try {
+        return Secret.password_lookup_sync(
+            SECRET_SCHEMA,
+            { credential: 'oauth-token' },
+            null,
+        ) ?? '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function saveToken(token) {
+    if (token) {
+        Secret.password_store_sync(
+            SECRET_SCHEMA,
+            { credential: 'oauth-token' },
+            Secret.COLLECTION_DEFAULT,
+            'Twitch OAuth Token',
+            token,
+            null,
+        );
+    } else {
+        try {
+            Secret.password_clear_sync(
+                SECRET_SCHEMA,
+                { credential: 'oauth-token' },
+                null,
+            );
+        } catch (_) {}
+    }
+}
 
 export default class TwitchFollowerPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
@@ -61,17 +103,15 @@ export default class TwitchFollowerPreferences extends ExtensionPreferences {
         authRow.add_suffix(authBtn);
         group.add(authRow);
 
-        const tokenRow = new Adw.EntryRow({
+        const tokenRow = new Adw.PasswordEntryRow({
             title: 'OAuth Token (paste from redirect URL)',
-            text: settings.get_string('oauth-token') || '',
             show_apply_button: true,
         });
+        const currentToken = loadToken();
+        if (currentToken)
+            tokenRow.text = currentToken;
         tokenRow.connect('apply', () => {
-            settings.set_string('oauth-token', tokenRow.text.trim());
-        });
-        settings.connect('changed::oauth-token', () => {
-            if (settings.get_string('oauth-token') !== tokenRow.text)
-                tokenRow.text = settings.get_string('oauth-token') || '';
+            saveToken(tokenRow.text.trim());
         });
         group.add(tokenRow);
 

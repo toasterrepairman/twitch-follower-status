@@ -9,12 +9,6 @@
       <description>Your Twitch application Client ID from dev.twitch.tv/console</description>
     </key>
 
-    <key name="oauth-token" type="s">
-      <default>''</default>
-      <summary>Twitch OAuth Token</summary>
-      <description>User access token with user:read:follows scope</description>
-    </key>
-
     <key name="sort-mode" type="s">
       <default>'viewers'</default>
       <summary>Sort Mode</summary>
