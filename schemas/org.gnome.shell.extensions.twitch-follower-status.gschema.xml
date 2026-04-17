@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.twitch-follower-status"
+          path="/org/gnome/shell/extensions/twitch-follower-status/">
+
+    <key name="client-id" type="s">
+      <default>''</default>
+      <summary>Twitch Client ID</summary>
+      <description>Your Twitch application Client ID from dev.twitch.tv/console</description>
+    </key>
+
+    <key name="oauth-token" type="s">
+      <default>''</default>
+      <summary>Twitch OAuth Token</summary>
+      <description>User access token with user:read:follows scope</description>
+    </key>
+
+    <key name="sort-mode" type="s">
+      <default>'viewers'</default>
+      <summary>Sort Mode</summary>
+      <description>Sort channels by: viewers, follow-date, or alphabetical</description>
+    </key>
+
+    <key name="refresh-interval" type="i">
+      <default>60</default>
+      <range min="30" max="300"/>
+      <summary>Refresh Interval</summary>
+      <description>Seconds between API refreshes (30-300)</description>
+    </key>
+
+    <key name="show-offline" type="b">
+      <default>true</default>
+      <summary>Show Offline Channels</summary>
+      <description>Whether to display offline channels in the list</description>
+    </key>
+
+  </schema>
+</schemalist>

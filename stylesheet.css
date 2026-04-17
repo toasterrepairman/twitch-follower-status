@@ -1,0 +1,161 @@
+.twitch-panel-count {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #bf94ff;
+    padding: 0 2px;
+}
+
+.twitch-sort-header {
+    padding: 6px 4px;
+    spacing: 4px;
+}
+
+.twitch-sort-btn {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 5px 0;
+    font-size: 11pt;
+    font-weight: bold;
+    color: #888;
+    text-align: center;
+}
+
+.twitch-sort-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #bbb;
+}
+
+.twitch-sort-btn.active {
+    background-color: rgba(145, 71, 255, 0.25);
+    border-color: rgba(145, 71, 255, 0.45);
+    color: #bf94ff;
+}
+
+.twitch-scroll {
+    padding: 0 4px;
+}
+
+.twitch-list {
+    spacing: 2px;
+}
+
+.twitch-item {
+    padding: 8px 6px;
+    border-radius: 8px;
+    spacing: 10px;
+    min-height: 52px;
+}
+
+.twitch-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.twitch-item.live {
+    background-color: rgba(145, 71, 255, 0.06);
+}
+
+.twitch-item.live:hover {
+    background-color: rgba(145, 71, 255, 0.14);
+}
+
+.twitch-avatar {
+    border-radius: 50%;
+    min-width: 34px;
+    min-height: 34px;
+}
+
+.twitch-avatar.live {
+    background-color: rgba(145, 71, 255, 0.4);
+}
+
+.twitch-avatar.offline {
+    background-color: rgba(120, 120, 120, 0.2);
+}
+
+.twitch-avatar-letter {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+}
+
+.twitch-item-info {
+    spacing: 1px;
+    x-expand: true;
+}
+
+.twitch-item-name {
+    font-weight: bold;
+    font-size: 12pt;
+    color: #ccc;
+}
+
+.twitch-item-name.live {
+    color: #fff;
+}
+
+.twitch-item-game {
+    font-size: 10pt;
+    color: #888;
+}
+
+.twitch-item-meta {
+    spacing: 1px;
+    text-align: right;
+}
+
+.twitch-live-dot {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #e8191c;
+    text-align: right;
+}
+
+.twitch-viewers {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #bf94ff;
+    text-align: right;
+}
+
+.twitch-uptime {
+    font-size: 9pt;
+    color: #777;
+    text-align: right;
+}
+
+.twitch-offline {
+    font-size: 10pt;
+    color: #555;
+    text-align: right;
+}
+
+.twitch-empty {
+    padding: 24px 0;
+    text-align: center;
+    color: #666;
+    font-size: 11pt;
+}
+
+.twitch-footer {
+    padding: 4px 6px;
+    spacing: 8px;
+}
+
+.twitch-status {
+    font-size: 9pt;
+    color: #666;
+}
+
+.twitch-refresh-btn {
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 14pt;
+    color: #aaa;
+}
+
+.twitch-refresh-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}

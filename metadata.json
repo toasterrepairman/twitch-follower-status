@@ -1,0 +1,8 @@
+{
+  "uuid": "twitch-follower-status@toast.sh",
+  "name": "Twitch Live Panel",
+  "description": "Displays a panel popover with your followed Twitch channels, their live status, viewer count, uptime, and sortable ordering.",
+  "version": 1,
+  "shell-version": ["45", "46", "47", "48", "49"],
+  "settings-schema": "org.gnome.shell.extensions.twitch-follower-status"
+}
