@@ -12,12 +12,12 @@
 
 .twitch-sort-btn {
     font-size: 10pt;
-    color: #888;
     padding: 4px 0;
     border-radius: 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(128, 128, 128, 0.3);
     background-color: transparent;
     text-align: center;
+    opacity: 0.7;
 }
 
 .twitch-sort-btn:first-child {
@@ -30,15 +30,16 @@
 
 .twitch-sort-btn:active {
     color: #bf94ff;
+    opacity: 1;
 }
 
 .twitch-sort-btn:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: #ccc;
+    background-color: rgba(128, 128, 128, 0.15);
+    opacity: 1;
 }
 
 .twitch-empty .popup-menu-item {
-    color: #666;
+    opacity: 0.5;
 }
 
 .twitch-row-title {
@@ -47,11 +48,10 @@
 }
 
 .twitch-row-title.live {
-    color: #fff;
 }
 
 .twitch-row-title.offline {
-    color: #999;
+    opacity: 0.55;
 }
 
 .twitch-row-subtitle {
@@ -64,12 +64,12 @@
 }
 
 .twitch-row-subtitle.offline {
-    color: #555;
+    opacity: 0.4;
 }
 
 .twitch-row-stats {
     font-size: 10pt;
-    color: #aaa;
+    opacity: 0.7;
     margin-right: 6px;
 }
 
@@ -94,17 +94,17 @@
 
 .twitch-status {
     font-size: 9pt;
-    color: #666;
+    opacity: 0.5;
 }
 
 .twitch-refresh-btn {
     padding: 2px 10px;
     border-radius: 6px;
     font-size: 14pt;
-    color: #aaa;
+    opacity: 0.7;
 }
 
 .twitch-refresh-btn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background-color: rgba(128, 128, 128, 0.15);
+    opacity: 1;
 }
