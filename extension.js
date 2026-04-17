@@ -84,6 +84,9 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
         this._refreshTimer = null;
         this._refreshing = false;
         this._settingsConnections = [];
+        this._sortMode = this._settings.get_string('sort-mode');
+        this._channelItems = [];
+        this._channelSection = null;
 
         this._buildPanelButton();
         this._buildPopover();
@@ -116,20 +119,15 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
     }
 
     _buildPopover() {
+        this._channelSection = new PopupMenu.PopupMenuSection();
         this._buildSortHeader();
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this._buildChannelList();
+        this.menu.addMenuItem(this._channelSection);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this._buildFooter();
     }
 
     _buildSortHeader() {
-        const headerBox = new St.BoxLayout({
-            vertical: false,
-            style_class: 'twitch-sort-header',
-            x_expand: true,
-        });
-
         const modes = [
             [SortMode.VIEWERS, 'Viewers'],
             [SortMode.FOLLOW_DATE, 'Followed'],
@@ -137,54 +135,38 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
         ];
 
         this._sortButtons = new Map();
-        const current = this._settings.get_string('sort-mode');
 
         for (const [id, label] of modes) {
-            const btn = new St.Button({
-                label,
-                style_class: 'twitch-sort-btn',
+            const item = new PopupMenu.PopupMenuItem(label, {
                 can_focus: true,
-                x_expand: true,
+                style_class: 'twitch-sort-menu-item',
             });
-            if (id === current) btn.add_style_class_name('active');
-            btn.connect('clicked', () => {
+
+            const check = new St.Icon({
+                icon_name: 'object-select-symbolic',
+                style_class: 'twitch-sort-check',
+                visible: id === this._sortMode,
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+            item.add_child(check);
+
+            const handlerId = item.connect('activate', () => {
+                this._sortMode = id;
                 this._settings.set_string('sort-mode', id);
             });
-            this._sortButtons.set(id, btn);
-            headerBox.add_child(btn);
+
+            this._sortButtons.set(id, { item, check, handlerId });
+            this.menu.addMenuItem(item);
         }
 
-        const item = new PopupMenu.PopupBaseMenuItem({
-            reactive: false,
-            can_focus: false,
-        });
-        item.add_child(headerBox);
-        this.menu.addMenuItem(item);
+        this._updateSortButtons();
     }
 
-    _buildChannelList() {
-        this._scrollView = new St.ScrollView({
-            style_class: 'twitch-scroll',
-            overlay_scrollbars: true,
-        });
-        this._scrollView.set_policy(
-            St.PolicyType.NEVER,
-            St.PolicyType.AUTOMATIC,
-        );
-        this._scrollView.set_height(420);
-
-        this._listBox = new St.BoxLayout({
-            vertical: true,
-            style_class: 'twitch-list',
-        });
-        this._scrollView.add_child(this._listBox);
-
-        const item = new PopupMenu.PopupBaseMenuItem({
-            reactive: false,
-            can_focus: false,
-        });
-        item.add_child(this._scrollView);
-        this.menu.addMenuItem(item);
+    _updateSortButtons() {
+        for (const [id, { check }] of this._sortButtons) {
+            check.visible = id === this._sortMode;
+        }
     }
 
     _buildFooter() {
@@ -225,10 +207,8 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
         };
 
         addConn('sort-mode', () => {
-            const mode = this._settings.get_string('sort-mode');
-            for (const [id, btn] of this._sortButtons) {
-                btn.toggle_style_class_name('active', id === mode);
-            }
+            this._sortMode = this._settings.get_string('sort-mode');
+            this._updateSortButtons();
             this._rebuildList();
         });
 
@@ -356,7 +336,6 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
     _rebuildList() {
         this._clearList();
 
-        const sortMode = this._settings.get_string('sort-mode');
         const showOffline = this._settings.get_boolean('show-offline');
 
         let items = this._followedChannels.map((ch) => {
@@ -364,7 +343,9 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
                 ch.broadcaster_login.toLowerCase(),
             );
             return {
-                ...ch,
+                broadcaster_name: ch.broadcaster_name,
+                broadcaster_login: ch.broadcaster_login,
+                followed_at: ch.followed_at,
                 stream: stream ?? null,
                 isLive: !!stream,
                 viewers: stream?.viewer_count ?? 0,
@@ -376,130 +357,89 @@ class TwitchFollowerIndicator extends PanelMenu.Button {
         items.sort((a, b) => {
             if (a.isLive !== b.isLive) return a.isLive ? -1 : 1;
 
-            switch (sortMode) {
+            switch (this._sortMode) {
                 case SortMode.VIEWERS:
                     return b.viewers - a.viewers;
                 case SortMode.FOLLOW_DATE:
                     return (
-                        new Date(a.followed_at) - new Date(b.followed_at)
+                        new Date(b.followed_at) - new Date(a.followed_at)
                     );
                 case SortMode.ALPHABETICAL:
-                    return a.broadcaster_name.localeCompare(
-                        b.broadcaster_name,
-                    );
+                    return a.broadcaster_name
+                        .toLowerCase()
+                        .localeCompare(b.broadcaster_name.toLowerCase());
                 default:
                     return 0;
             }
         });
 
         if (items.length === 0) {
-            this._listBox.add_child(
-                new St.Label({
-                    text: showOffline
-                        ? 'No followed channels found'
-                        : 'No channels are live',
-                    style_class: 'twitch-empty',
-                }),
+            const empty = new PopupMenu.PopupMenuItem(
+                showOffline
+                    ? 'No followed channels found'
+                    : 'No channels are live',
             );
+            empty.set_sensitive(false);
+            empty.style_class = 'twitch-empty';
+            this._channelSection.addMenuItem(empty);
             return;
         }
 
-        for (const item of items)
-            this._listBox.add_child(this._createItem(item));
+        for (const ch of items) {
+            const item = this._createItem(ch);
+            this._channelSection.addMenuItem(item);
+            this._channelItems.push(item);
+        }
     }
 
     _createItem(ch) {
-        const row = new St.BoxLayout({
-            vertical: false,
-            style_class: `twitch-item ${ch.isLive ? 'live' : 'offline'}`,
-            x_expand: true,
-            reactive: true,
-        });
+        const title = ch.isLive
+            ? `${ch.broadcaster_name}  \u25CF ${formatViewers(ch.viewers)} \u00B7 ${formatUptime(ch.stream.started_at)}`
+            : ch.broadcaster_name;
 
-        const avatarBin = new St.Bin({
-            style_class: `twitch-avatar ${ch.isLive ? 'live' : 'offline'}`,
-            width: 34,
-            height: 34,
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        avatarBin.set_child(
-            new St.Label({
-                text: ch.broadcaster_name.charAt(0).toUpperCase(),
-                style_class: 'twitch-avatar-letter',
-            }),
-        );
-        row.add_child(avatarBin);
+        const item = new PopupMenu.PopupMenuItem(title);
 
-        const info = new St.BoxLayout({
-            vertical: true,
-            style_class: 'twitch-item-info',
+        const subtitle = ch.isLive
+            ? (ch.stream.game_name || 'No category')
+            : 'Offline';
+
+        const subtitleLabel = new St.Label({
+            text: subtitle,
+            style_class: `twitch-row-subtitle ${ch.isLive ? 'live' : 'offline'}`,
             x_expand: true,
         });
-        info.add_child(
-            new St.Label({
-                text: ch.broadcaster_name,
-                style_class: `twitch-item-name ${ch.isLive ? 'live' : ''}`,
-            }),
-        );
-        if (ch.isLive && ch.stream) {
-            info.add_child(
-                new St.Label({
-                    text: ch.stream.game_name || 'No category',
-                    style_class: 'twitch-item-game',
-                }),
-            );
+        item.label.style_class = `twitch-row-title ${ch.isLive ? 'live' : 'offline'}`;
+
+        const vbox = item.label.get_parent();
+        if (vbox) {
+            vbox.add_child(subtitleLabel);
         }
-        row.add_child(info);
-
-        const meta = new St.BoxLayout({
-            vertical: true,
-            style_class: 'twitch-item-meta',
-        });
 
         if (ch.isLive) {
-            meta.add_child(
-                new St.Label({
-                    text: '\u25CF LIVE',
-                    style_class: 'twitch-live-dot',
-                }),
-            );
-            meta.add_child(
-                new St.Label({
-                    text: formatViewers(ch.viewers),
-                    style_class: 'twitch-viewers',
-                }),
-            );
-            meta.add_child(
-                new St.Label({
-                    text: formatUptime(ch.stream.started_at),
-                    style_class: 'twitch-uptime',
-                }),
-            );
-        } else {
-            meta.add_child(
-                new St.Label({
-                    text: 'Offline',
-                    style_class: 'twitch-offline',
-                }),
-            );
+            const badge = new St.Label({
+                text: ' LIVE ',
+                style_class: 'twitch-row-badge',
+                x_align: Clutter.ActorAlign.END,
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+            item.add_child(badge);
         }
-        row.add_child(meta);
 
-        row.connect('button-release-event', () => {
+        item.connect('activate', () => {
             Gio.AppInfo.launch_default_for_uri(
                 `https://twitch.tv/${ch.broadcaster_login}`,
                 null,
             );
         });
 
-        return row;
+        return item;
     }
 
     _clearList() {
-        let child;
-        while ((child = this._listBox.get_first_child()))
-            this._listBox.remove_child(child);
+        for (const item of this._channelItems)
+            item.destroy();
+        this._channelItems = [];
+        this._channelSection.removeAll();
     }
 
     destroy() {
